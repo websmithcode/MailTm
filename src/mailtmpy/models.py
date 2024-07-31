@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class Credentials(BaseModel):
-    username: str
+    address: str
     password: str
 
 

@@ -30,7 +30,7 @@ class Email(Listen):
         except:
             return False
 
-    def register(self, username=None, password=None, domain=None):
+    def register(self, username=None, password=None, domain=None) -> Credentials:
         self.domain = domain if domain else self.domain
         username = username if username else username_gen()
         password = password if password else password_gen()
@@ -56,13 +56,13 @@ class Email(Listen):
         if not self.address:
             raise Exception("Failed to make an address")
 
-        return Credentials(username=self.address, password=self.password)
+        return Credentials(address=self.address, password=self.password)
 
     def login(self, address: str, password: str) -> None:
         self.address = address
         self.password = password
         self.get_token()
-        return Credentials(username=self.address, password=self.password)
+        return Credentials(address=self.address, password=self.password)
 
     def get_token(self):
         url = "https://api.mail.tm/token"
