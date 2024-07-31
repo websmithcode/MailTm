@@ -1,14 +1,22 @@
-import json
+from collections.abc import Callable
+from requests import Session
+
 import time
-from threading import Thread
+from threading import Thread, Event
 from .models import ShortMessage, Message
 
 
 class Listen:
     listen = False
     message_ids = []
+    new_message_event: Event
+    token: str
+    listener: None | Callable
+    session: Session
 
-    def message_list(self):
+    def new_messages_list(self):
+        self.new_message_event = Event()
+
         url = "https://api.mail.tm/messages"
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
@@ -20,8 +28,8 @@ class Listen:
             if data['hydra:member'][i]['id'] not in self.message_ids
         ]
 
-    def message(self, idx):
-        url = "https://api.mail.tm/messages/" + idx
+    def message(self, id):
+        url = "https://api.mail.tm/messages/" + id
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
         response.raise_for_status()
@@ -29,14 +37,18 @@ class Listen:
 
     def run(self):
         while self.listen:
-            for message in self.message_list():
+            for message in self.new_messages_list():
                 self.message_ids.append(message['id'])
-                message = self.message(message['id'])
-                self.listener(message)
+
+                if self.listener:
+                    message = self.message(message['id'])
+                    self.listener(message)
+
+                self.new_message_event.set()
 
             time.sleep(self.interval)
 
-    def start(self, listener, interval=3):
+    def start(self, listener=None, interval=3):
         if self.listen:
             self.stop()
 
@@ -51,3 +63,9 @@ class Listen:
     def stop(self):
         self.listen = False
         self.thread.join()
+
+    def wait_for_new_message(self):
+        self.new_message_event.wait()
+        self.new_message_event.clear()
+
+        return self.message(self.message_ids[-1]['id'])
