@@ -4,11 +4,14 @@ import random
 import requests
 from .message import Listen
 
-def username_gen(length=24, chars= string.ascii_letters + string.digits):
-    return ''.join(random.choice(chars) for _ in range(length))  
 
-def password_gen(length=8, chars= string.ascii_letters + string.digits + string.punctuation):
-    return ''.join(random.choice(chars) for _ in range(length))  
+def username_gen(length=24, chars=string.ascii_letters + string.digits):
+    return ''.join(random.choice(chars) for _ in range(length))
+
+
+def password_gen(length=8, chars=string.ascii_letters + string.digits + string.punctuation):
+    return ''.join(random.choice(chars) for _ in range(length))
+
 
 class Email(Listen):
     token = ""
@@ -46,7 +49,7 @@ class Email(Listen):
             "address": f"{username}@{self.domain}",
             "password": password
         }
-        headers = { 'Content-Type': 'application/json' }
+        headers = {'Content-Type': 'application/json'}
         response = self.session.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
@@ -57,7 +60,7 @@ class Email(Listen):
             self.address = f"{username}@{self.domain}"
         self.password = password
 
-        self.get_token(password)
+        self.get_token()
 
         if not self.address:
             raise Exception("Failed to make an address")
@@ -67,11 +70,16 @@ class Email(Listen):
             "password": self.password
         }
 
-    def get_token(self, password):
+    def login(self, address: str, password: str) -> None:
+        self.address = address
+        self.password = password
+        self.get_token()
+
+    def get_token(self):
         url = "https://api.mail.tm/token"
         payload = {
             "address": self.address,
-            "password": password
+            "password": self.password
         }
         headers = {'Content-Type': 'application/json'}
         response = self.session.post(url, headers=headers, json=payload)
@@ -80,12 +88,13 @@ class Email(Listen):
             self.token = response.json()['token']
         except:
             raise Exception("Failed to get token")
-        
+
 
 if __name__ == "__main__":
     def listener(message):
         print("\nSubject: " + message['subject'])
-        print("Content: " + message['text'] if message['text'] else message['html'])
+        print("Content: " + message['text']
+              if message['text'] else message['html'])
 
     # Get Domains
     test = Email()
