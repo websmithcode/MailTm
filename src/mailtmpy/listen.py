@@ -20,7 +20,7 @@ class Listen:
         self.new_message_event = Event()
         self.session = requests.Session()
 
-    def new_messages_list(self):
+    def new_messages_list(self) -> list[ShortMessage]:
         url = "https://api.mail.tm/messages"
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
@@ -33,7 +33,7 @@ class Listen:
             if data['hydra:member'][i]['id'] not in self.message_ids
         ]
 
-    def message(self, id):
+    def message(self, id) -> Message:
         url = "https://api.mail.tm/messages/" + id
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
@@ -41,7 +41,7 @@ class Listen:
 
         return Message(**response.json())
 
-    def run(self):
+    def run(self) -> None:
         while self.listen:
             for message in self.new_messages_list():
                 self.message_ids.append(message.id)
@@ -54,7 +54,7 @@ class Listen:
 
             time.sleep(self.interval)
 
-    def start(self, listener=None, interval=3):
+    def start(self, listener=None, interval=3) -> None:
         if self.listen:
             self.stop()
 
@@ -66,11 +66,11 @@ class Listen:
         self.thread = Thread(target=self.run)
         self.thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         self.listen = False
         self.thread.join()
 
-    def wait_for_new_message(self):
+    def wait_for_new_message(self) -> Message:
         self.new_message_event.wait()
         self.new_message_event.clear()
 

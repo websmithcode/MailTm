@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="MailTm Py",
-    version="0.0.81",
+    version="0.1.1",
     author="WSCode",
     description="Temporary Email",
     long_description=long_description,

@@ -14,7 +14,7 @@ class Email(Listen):
         if self.get_domain() is not False:
             print("Failed to get domains")
 
-    def get_domain(self):
+    def get_domain(self) -> str | False:
         url = "https://api.mail.tm/domains"
         response = self.session.get(url)
         response.raise_for_status()
@@ -58,13 +58,13 @@ class Email(Listen):
 
         return Credentials(address=self.address, password=self.password)
 
-    def login(self, address: str, password: str) -> None:
+    def login(self, address: str, password: str) -> Credentials:
         self.address = address
         self.password = password
         self.get_token()
         return Credentials(address=self.address, password=self.password)
 
-    def get_token(self):
+    def get_token(self) -> str:
         url = "https://api.mail.tm/token"
         payload = {
             "address": self.address,
