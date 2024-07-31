@@ -55,11 +55,17 @@ class Email(Listen):
             self.address = data['address']
         except:
             self.address = f"{username}@{self.domain}"
+        self.password = password
 
         self.get_token(password)
 
         if not self.address:
             raise Exception("Failed to make an address")
+
+        return {
+            "address": self.address,
+            "password": self.password
+        }
 
     def get_token(self, password):
         url = "https://api.mail.tm/token"
