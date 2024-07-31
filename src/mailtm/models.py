@@ -10,6 +10,9 @@ class BaseMessage(BaseModel):
     class MailAccount(BaseModel):
         name: str
         address: str
+
+        def __str__(self):
+            return f"{self.name} <{self.address}>"
     id: str
 
     accountId: str
@@ -41,12 +44,15 @@ class Message(ShortMessage):
         size: int
         downloadUrl: str
 
+        def __str__(self):
+            return self.filename
+
     cc: list[str]
     bcc: list[str]
     flagged: bool
-    verifications: list[str]
+    verifications: dict
     retention: bool
     retentionDate: str
     text: str
     html: list[str]
-    attachments: list[Attachment]
+    attachments: list[Attachment] = []

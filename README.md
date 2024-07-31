@@ -1,11 +1,16 @@
 # MailTM API Wrapper
 
-[![Downloads](https://pepy.tech/badge/mailtm)](https://pepy.tech/project/mailtm)
+<!-- [![Downloads](https://pepy.tech/badge/mailtm)](https://pepy.tech/project/mailtm)
 
 [![Downloads](https://pepy.tech/badge/mailtm/month)](https://pepy.tech/project/mailtm)
-[![Downloads](https://pepy.tech/badge/mailtm/week)](https://pepy.tech/project/mailtm)
+[![Downloads](https://pepy.tech/badge/mailtm/week)](https://pepy.tech/project/mailtm) -->
 
-MailTm is a free temporary mail service, This library is useful for automation tasks such as making accounts that needs email verification.
+MailTm is a free temporary mail service, This fork of library, thats is useful for automation tasks such as making accounts that needs email verification.
+New in fork:
+- Pydantic models for messages and credentials on register
+- Waiting for mew message
+- Return credentials for new registered account
+- Login method
 
 ## Installation
 
@@ -41,6 +46,10 @@ print("\nEmail Adress: " + str(test.address))
 # Start listening
 test.start(listener)
 print("\nWaiting for new emails...")
+
+# Wait for new message
+new_message = test.wait_for_new_message()
+print("New message:", new_message)
 ```
 
 # Documentation

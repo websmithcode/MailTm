@@ -1,8 +1,10 @@
-from collections.abc import Callable
-from requests import Session
-
+from typing import Callable, Union
 import time
 from threading import Thread, Event
+
+from requests import Session
+import requests
+
 from .models import ShortMessage, Message
 
 
@@ -11,20 +13,23 @@ class Listen:
     message_ids = []
     new_message_event: Event
     token: str
-    listener: None | Callable
+    listener: Union[None, Callable]
     session: Session
 
-    def new_messages_list(self):
+    def __init__(self):
         self.new_message_event = Event()
+        self.session = requests.Session()
 
+    def new_messages_list(self):
         url = "https://api.mail.tm/messages"
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
         response.raise_for_status()
 
         data = response.json()
+
         return [
-            ShortMessage(msg) for i, msg in enumerate(data['hydra:member'])
+            ShortMessage(**msg) for i, msg in enumerate(data['hydra:member'])
             if data['hydra:member'][i]['id'] not in self.message_ids
         ]
 
@@ -33,15 +38,16 @@ class Listen:
         headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
         response.raise_for_status()
-        return Message(response.json())
+
+        return Message(**response.json())
 
     def run(self):
         while self.listen:
             for message in self.new_messages_list():
-                self.message_ids.append(message['id'])
+                self.message_ids.append(message.id)
 
                 if self.listener:
-                    message = self.message(message['id'])
+                    message = self.message(message.id)
                     self.listener(message)
 
                 self.new_message_event.set()
@@ -68,4 +74,4 @@ class Listen:
         self.new_message_event.wait()
         self.new_message_event.clear()
 
-        return self.message(self.message_ids[-1]['id'])
+        return self.message(self.message_ids[-1])

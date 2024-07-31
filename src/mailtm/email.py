@@ -1,27 +1,16 @@
-import json
-import string
-import random
-import requests
+from .helpers import username_gen, password_gen
 from .listen import Listen
-from .models import Credentials
-
-
-def username_gen(length=24, chars=string.ascii_letters + string.digits):
-    return ''.join(random.choice(chars) for _ in range(length))
-
-
-def password_gen(length=8, chars=string.ascii_letters + string.digits + string.punctuation):
-    return ''.join(random.choice(chars) for _ in range(length))
+from .models import Credentials, Message
 
 
 class Email(Listen):
-    token = ""
     domain = ""
     address = ""
     password = ""
-    session = requests.Session()
 
     def __init__(self):
+        super().__init__()
+
         if self.get_domain() is not False:
             print("Failed to get domains")
 
@@ -93,10 +82,12 @@ class Email(Listen):
 
 
 if __name__ == "__main__":
-    def listener(message):
-        print("\nSubject: " + message['subject'])
-        print("Content: " + message['text']
-              if message['text'] else message['html'])
+    def handler(message: Message):
+        print("\nNew Message:")
+        print('From:', message.from_)
+        print("Subject:", message.subject)
+        print("Content:", message.text
+              if message.text else message.html)
 
     # Get Domains
     test = Email()
@@ -104,11 +95,19 @@ if __name__ == "__main__":
 
     # Make new email address
     test.register()
-    print("\nEmail Adress: " + str(test.address))
+    print("\nEmail Adress:", test.address)
+    print("Email Password:", test.password)
 
     # Start listening
-    test.start(listener)
+    test.start(handler)
     print("\nWaiting for new emails...")
+
+    # Wait for new message
+    # test.start()
+    # print("\nScript execution is paused. Waiting for new email...")
+    # message = test.wait_for_new_message()
+    # print("New message is recieved, script execution is resumed.")
+    # handler(message)
 
     # Stop listening
     # test.stop()

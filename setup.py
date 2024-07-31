@@ -6,14 +6,14 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="MailTm",
     version="0.0.81",
-    author="MainSilent",
+    author="WSCode",
     description="Temporary Email",
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords=['mail', 'email', 'temporary mail', 'temporary email', 'mailtm'],
-    url="https://github.com/MainSilent/MailTm",
+    url="https://github.com/websmithcode/MailTm",
     project_urls={
-        "Bug Tracker": "https://github.com/MainSilent/MailTm/issues",
+        "Bug Tracker": "https://github.com/websmithcode/MailTm/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -22,6 +22,6 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     install_requires=['requests', 'pydantic']
 )
