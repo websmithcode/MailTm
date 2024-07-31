@@ -2,7 +2,8 @@ import json
 import string
 import random
 import requests
-from .message import Listen
+from .listen import Listen
+from .models import Credentials
 
 
 def username_gen(length=24, chars=string.ascii_letters + string.digits):
@@ -17,13 +18,14 @@ class Email(Listen):
     token = ""
     domain = ""
     address = ""
+    password = ""
     session = requests.Session()
 
     def __init__(self):
-        if not self.domains():
+        if self.get_domain() is not False:
             print("Failed to get domains")
 
-    def domains(self):
+    def get_domain(self):
         url = "https://api.mail.tm/domains"
         response = self.session.get(url)
         response.raise_for_status()
@@ -33,7 +35,7 @@ class Email(Listen):
             for domain in data['hydra:member']:
                 if domain['isActive']:
                     self.domain = domain['domain']
-                    return True
+                    return self.domain
 
             raise Exception("No Domain")
         except:
@@ -65,15 +67,13 @@ class Email(Listen):
         if not self.address:
             raise Exception("Failed to make an address")
 
-        return {
-            "address": self.address,
-            "password": self.password
-        }
+        return Credentials(username=self.address, password=self.password)
 
     def login(self, address: str, password: str) -> None:
         self.address = address
         self.password = password
         self.get_token()
+        return Credentials(username=self.address, password=self.password)
 
     def get_token(self):
         url = "https://api.mail.tm/token"
@@ -88,6 +88,8 @@ class Email(Listen):
             self.token = response.json()['token']
         except:
             raise Exception("Failed to get token")
+
+        return self.token
 
 
 if __name__ == "__main__":

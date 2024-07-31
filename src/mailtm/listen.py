@@ -1,6 +1,8 @@
 import json
 import time
 from threading import Thread
+from .models import ShortMessage, Message
+
 
 class Listen:
     listen = False
@@ -8,22 +10,22 @@ class Listen:
 
     def message_list(self):
         url = "https://api.mail.tm/messages"
-        headers = { 'Authorization': 'Bearer ' + self.token }
+        headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
         response.raise_for_status()
-        
+
         data = response.json()
-        return  [
-                    msg for i, msg in enumerate(data['hydra:member']) 
-                        if data['hydra:member'][i]['id'] not in self.message_ids
-                ]
+        return [
+            ShortMessage(msg) for i, msg in enumerate(data['hydra:member'])
+            if data['hydra:member'][i]['id'] not in self.message_ids
+        ]
 
     def message(self, idx):
         url = "https://api.mail.tm/messages/" + idx
-        headers = { 'Authorization': 'Bearer ' + self.token }
+        headers = {'Authorization': 'Bearer ' + self.token}
         response = self.session.get(url, headers=headers)
         response.raise_for_status()
-        return response.json()
+        return Message(response.json())
 
     def run(self):
         while self.listen:
@@ -45,7 +47,7 @@ class Listen:
         # Start listening thread
         self.thread = Thread(target=self.run)
         self.thread.start()
-    
+
     def stop(self):
         self.listen = False
         self.thread.join()
