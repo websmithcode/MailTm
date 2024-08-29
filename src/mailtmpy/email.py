@@ -3,6 +3,10 @@ from .listen import Listen
 from .models import Credentials, Message
 
 
+class EmailException(Exception):
+    pass
+
+
 class Email(Listen):
     domain = ""
     address = ""
@@ -21,14 +25,14 @@ class Email(Listen):
 
         try:
             data = response.json()
-            for domain in data['hydra:member']:
-                if domain['isActive']:
-                    self.domain = domain['domain']
+            for domain in data["hydra:member"]:
+                if domain["isActive"]:
+                    self.domain = domain["domain"]
                     return self.domain
 
             raise Exception("No Domain")
-        except:
-            return False
+        except Exception as e:
+            raise EmailException("Failed to get domain", e)
 
     def register(self, username=None, password=None, domain=None) -> Credentials:
         self.domain = domain if domain else self.domain
@@ -36,19 +40,17 @@ class Email(Listen):
         password = password if password else password_gen()
 
         url = "https://api.mail.tm/accounts"
-        payload = {
-            "address": f"{username}@{self.domain}",
-            "password": password
-        }
-        headers = {'Content-Type': 'application/json'}
+        payload = {"address": f"{username}@{self.domain}", "password": password}
+        headers = {"Content-Type": "application/json"}
         response = self.session.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
         data = response.json()
-        try:
-            self.address = data['address']
-        except:
+        if "address" in data:
+            self.address = data["address"]
+        else:
             self.address = f"{username}@{self.domain}"
+
         self.password = password
 
         self.get_token()
@@ -66,28 +68,25 @@ class Email(Listen):
 
     def get_token(self) -> str:
         url = "https://api.mail.tm/token"
-        payload = {
-            "address": self.address,
-            "password": self.password
-        }
-        headers = {'Content-Type': 'application/json'}
+        payload = {"address": self.address, "password": self.password}
+        headers = {"Content-Type": "application/json"}
         response = self.session.post(url, headers=headers, json=payload)
         response.raise_for_status()
         try:
-            self.token = response.json()['token']
-        except:
-            raise Exception("Failed to get token")
+            self.token = response.json()["token"]
+        except Exception as e:
+            raise Exception("Failed to get token", e)
 
         return self.token
 
 
 if __name__ == "__main__":
+
     def handler(message: Message):
         print("\nNew Message:")
-        print('From:', message.from_)
+        print("From:", message.from_)
         print("Subject:", message.subject)
-        print("Content:", message.text
-              if message.text else message.html)
+        print("Content:", message.text if message.text else message.html)
 
     # Get Domains
     test = Email()
