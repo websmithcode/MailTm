@@ -17,19 +17,19 @@ New in fork:
 Windows:
 
 ```
-pip install MailTm
+pip install mailtmpy
 ```
 
 Linux/Mac OS:
 
 ```
-pip3 install MailTm
+pip3 install mailtmpy
 ```
 
 ## Example
 
 ```python
-from mailtm import Email
+from mailtmpy import Email
 
 def listener(message):
     print("\nSubject: " + message['subject'])
