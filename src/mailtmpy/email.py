@@ -1,3 +1,5 @@
+from typing import Literal
+
 from .helpers import username_gen, password_gen
 from .listen import Listen
 from .models import Credentials, Message
@@ -18,7 +20,7 @@ class Email(Listen):
         if self.get_domain() is not False:
             print("Failed to get domains")
 
-    def get_domain(self) -> str | False:
+    def get_domain(self) -> str | Literal[False]:
         url = "https://api.mail.tm/domains"
         response = self.session.get(url)
         response.raise_for_status()
